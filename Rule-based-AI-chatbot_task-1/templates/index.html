@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Simple AI Chatbot</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+}
+
+.chat-container{
+    width:95%;
+    max-width:450px;
+    height:90vh;
+    background:white;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 15px 40px rgba(0,0,0,0.35);
+    display:flex;
+    flex-direction:column;
+}
+
+.chat-header{
+    background:#2563eb;
+    color:white;
+    text-align:center;
+    padding:18px;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.chat-header span{
+    font-size:14px;
+    display:block;
+    margin-top:5px;
+}
+
+#chat-box{
+    height:560px;
+    overflow-y:auto;
+    padding:15px;
+    background:#f8fafc;
+}
+
+.message{
+    margin:10px 0;
+    max-width:80%;
+    padding:12px;
+    border-radius:15px;
+    word-wrap:break-word;
+}
+
+.user-message{
+    background:#2563eb;
+    color:white;
+    margin-left:auto;
+    border-radius:15px 15px 0 15px;
+}
+
+.bot-message{
+    background:#e2e8f0;
+    color:black;
+    border-radius:15px 15px 15px 0;
+}
+
+.typing{
+    font-style:italic;
+    color:gray;
+    margin-bottom:10px;
+}
+
+.input-area{
+    display:flex;
+    border-top:1px solid #ddd;
+}
+
+.input-area input{
+    flex:1;
+    border:none;
+    outline:none;
+    padding:15px;
+    font-size:15px;
+}
+
+.input-area button{
+    border:none;
+    background:#2563eb;
+    color:white;
+    padding:15px 25px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.input-area button:hover{
+    background:#1d4ed8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="chat-container">
+
+    <div class="chat-header">
+        🤖 Simple AI Assistant
+        <span>Rule-Based Chatbot</span>
+    </div>
+
+    <div id="chat-box">
+
+        <div class="message bot-message">
+            Hello 👋 <br>
+            I can help with:
+            <br><br>
+            • Greetings
+            <br>
+            • Time & Date
+            <br>
+            • Calculator
+            <br>
+            • Jokes
+            <br>
+            • Motivation
+            <br>
+            • Study Tips
+        </div>
+
+    </div>
+
+    <div class="input-area">
+        <input
+            type="text"
+            id="user-input"
+            placeholder="Type a message..."
+        >
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+</div>
+
+<script>
+
+async function sendMessage() {
+
+    let input = document.getElementById("user-input");
+    let message = input.value.trim();
+
+    if(message === "") return;
+
+    let chatBox = document.getElementById("chat-box");
+
+    // User message
+    chatBox.innerHTML += `
+        <div class="message user-message">
+            ${message}
+        </div>
+    `;
+
+    // Typing indicator
+    chatBox.innerHTML += `
+        <div id="typing" class="typing">
+            Bot is typing...
+        </div>
+    `;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    input.value = "";
+
+    const response = await fetch("/get",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            message:message
+        })
+    });
+
+    const data = await response.json();
+
+    document.getElementById("typing").remove();
+
+    chatBox.innerHTML += `
+        <div class="message bot-message">
+            ${data.response}
+        </div>
+    `;
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Enter key support
+document.getElementById("user-input")
+.addEventListener("keypress", function(event){
+
+    if(event.key === "Enter"){
+        sendMessage();
+    }
+
+});
+
+</script>
+
+</body>
+</html>
